@@ -1,20 +1,19 @@
-// const express = require('express')// method-1
-import express from "express"; // method-2
+import express from "express";
 import dotenv from "dotenv"; 
 import connectDB from "./config/database.js";
 import userRoute from "./routes/userRoute.js";
 import messageRoute from "./routes/messageRoute.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { app,server } from "./socket/socket.js";
-dotenv.config({});
+import { app, server } from "./socket/socket.js";
 
- 
+dotenv.config();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Allow specific frontend domains
+// ✅ CORS config
 const allowedOrigins = [
   'https://chat-app-blue-phi-26.vercel.app',
+  'https://chat-9j9wr5bsm-ashutosh-nsuts-projects.vercel.app',
   'http://localhost:3000'
 ];
 
@@ -26,24 +25,21 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
-// middleware
 
-app.use(express.urlencoded({extended:true}));
-app.use(express.json()); 
+// ✅ Middleware (after CORS)
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieParser());
 
+// ✅ Routes
+app.use("/api/v1/user", userRoute); 
+app.use("/api/v1/message", messageRoute);
 
-
-
-// routes
-app.use("/api/v1/user",userRoute); 
-app.use("/api/v1/message",messageRoute);
- 
-
-server.listen(PORT, ()=>{
-    connectDB();
-    console.log(`Server listen at prot ${PORT}`);
+// ✅ Start server
+server.listen(PORT, () => {
+  connectDB();
+  console.log(`Server listening on port ${PORT}`);
 });
-
