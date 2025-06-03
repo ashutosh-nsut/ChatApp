@@ -18,7 +18,6 @@ app.use(express.json());
 app.use(cookieParser());
 const corsOption = {
   origin: [
-    'http://localhost:3000',
     'https://chat-muejucpme-ashutosh-nsuts-projects.vercel.app'
   ],
   credentials: true
