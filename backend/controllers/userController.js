@@ -38,42 +38,41 @@ export const register = async (req, res) => {
     }
 };
 export const login = async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        if (!username || !password) {
-            return res.status(400).json({ message: "All fields are required" });
-        };
-        const user = await User.findOne({ username });
-        if (!user) {
-            return res.status(400).json({
-                message: "Incorrect username or password",
-                success: false
-            })
-        };
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) {
-            return res.status(400).json({
-                message: "Incorrect username or password",
-                success: false
-            })
-        };
-        const tokenData = {
-            userId: user._id
-        };
+  try {
+    const { email, password } = req.body;
+    
+    // Your user validation logic here
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-        const token = await jwt.sign(tokenData, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) return res.status(401).json({ message: "Invalid credentials" });
 
-        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict' }).json({
-            _id: user._id,
-            username: user.username,
-            fullName: user.fullName,
-            profilePhoto: user.profilePhoto
-        });
+    // Create JWT token
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: '1d',
+    });
 
-    } catch (error) {
-        console.log(error);
-    }
-}
+    // Set cookie with token
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // true on prod, false on dev
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // needed for cross-site cookie
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    // Send response without token (it's in cookie)
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      user: { id: user._id, name: user.name, email: user.email }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const logout = (req, res) => {
     try {
         return res.status(200).cookie("token", "", { maxAge: 0 }).json({
