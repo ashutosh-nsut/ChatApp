@@ -10,7 +10,7 @@ import { app, server } from "./socket/socket.js";
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 
-// ✅ CORS config
+// ✅ Allowed frontend origins
 const allowedOrigins = [
   "https://chat-app-blue-phi-26.vercel.app",
   "https://chat-9j9wr5bsm-ashutosh-nsuts-projects.vercel.app",
@@ -19,26 +19,27 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
+    // Allow requests with no origin (e.g., Postman or server-to-server)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true,
+  credentials: true, // IMPORTANT to allow cookies cross-origin
   optionsSuccessStatus: 200
 }));
 
-// ✅ Middleware (after CORS)
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Routes
+// Routes
 app.use("/api/v1/user", userRoute); 
 app.use("/api/v1/message", messageRoute);
 
-// ✅ Start server
+// Start server
 server.listen(PORT, () => {
   connectDB();
   console.log(`Server listening on port ${PORT}`);
