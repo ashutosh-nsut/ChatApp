@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 5000;
 
 // ✅ CORS config
 const allowedOrigins = [
-  'https://chat-app-blue-phi-26.vercel.app',
-  'https://chat-9j9wr5bsm-ashutosh-nsuts-projects.vercel.app',
-  'http://localhost:3000'
+  "https://chat-app-blue-phi-26.vercel.app",
+  "https://chat-9j9wr5bsm-ashutosh-nsuts-projects.vercel.app",
+  "http://localhost:3000"
 ];
 
 app.use(cors({
